@@ -8,19 +8,16 @@
 </head>
 <body>
   <header class="hero">
-    <div class="top-bar">
-      <div class="buttons">
-      </div>
-    </div>
-
     <div class="content">
-      <p class="quote">“PRIMEIRO CAMPEONATO DE FISIOCULTURISMO SKYFIT SOROCABA”</p>
-      <p class="text">Venha participar do primeiro campeonato de fisiculturismo SKYFIT.</p>
-      <p class="text">Endereço: Rua Exemplo, 123 - Sorocaba/SP</p>
+      <p class="quote">Primeiro Campeonato de Fisiculturismo SKYFIT – Sorocaba</p>
+      <p class="subtitle">O maior show de força e estética da região!</p>
+      <p class="text">Participe deste grande evento que vai reunir atletas, apaixonados por musculação e o melhor do fisiculturismo.</p>
+      <p class="text">Ingressos a partir de <strong>R$50,00</strong> com acesso garantido ao evento.</p>
+      <p class="text">Local: Rua Exemplo, 123 – Sorocaba/SP</p>
     </div>
   </header>
 
-  <section class="countdown">
+  <section class="countdown" id="countdown">
     <p>Garanta seu ingresso! O valor sobe em:</p>
     <div id="timer">
       <div><span id="days">00</span><small>Dias</small></div>
@@ -28,10 +25,10 @@
       <div><span id="minutes">00</span><small>Minutos</small></div>
       <div><span id="seconds">00</span><small>Segundos</small></div>
     </div>
-    <a href="#" class="btn big highlight" id="btnIngressos3">Comprar Ingressos</a>
+    <a href="#" class="btn highlight" id="btnIngressos">Comprar Ingressos</a>
   </section>
 
-  <!-- Modal -->
+  <!-- Modal formulário -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
@@ -51,10 +48,26 @@
     </div>
   </div>
 
+  <!-- Modal PIX -->
+  <div id="modalPix" class="modal">
+    <div class="modal-content">
+      <span class="closePix">&times;</span>
+      <h2>Pagamento via PIX</h2>
+      <p>Escaneie o QR Code abaixo ou copie a chave PIX para realizar o pagamento:</p>
+      <img src="img/qrcode.png" alt="QR Code PIX" style="width:200px; margin:20px auto; display:block;">
+      <p style="text-align:center; margin-top:10px; font-weight:bold; color:#f33;">
+        Chave PIX: <br>
+        <span style="font-size:1.1rem; color:#000;">seuemail@exemplo.com</span>
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
   <script>
     // Contagem regressiva
     const endDate = new Date("2025-10-04T15:20:00").getTime();
-
     function updateCountdown() {
       const now = new Date().getTime();
       const distance = endDate - now;
@@ -63,7 +76,6 @@
         document.getElementById("timer").innerHTML = "Promoção encerrada!";
         return;
       }
-
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -74,35 +86,53 @@
       document.getElementById("minutes").innerText = minutes.toString().padStart(2, "0");
       document.getElementById("seconds").innerText = seconds.toString().padStart(2, "0");
     }
-
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
     // Modal
     const modal = document.getElementById("modal");
-    const btns = [document.getElementById("btnIngressos"), document.getElementById("btnIngressos2"), document.getElementById("btnIngressos3")];
+    const modalPix = document.getElementById("modalPix");
+    const btn = document.getElementById("btnIngressos");
     const closeBtn = document.querySelector(".close");
+    const closePix = document.querySelector(".closePix");
     const form = document.getElementById("formIngressos");
 
-    btns.forEach(btn => {
-      if (btn) {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          modal.style.display = "flex";
-        });
-      }
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      modal.style.display = "flex";
     });
-
-    closeBtn.addEventListener("click", () => {
-      modal.style.display = "none";
-    });
+    closeBtn.addEventListener("click", () => modal.style.display = "none");
+    closePix.addEventListener("click", () => modalPix.style.display = "none");
 
     window.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-      }
+      if (e.target === modal) modal.style.display = "none";
+      if (e.target === modalPix) modalPix.style.display = "none";
     });
 
+    // Máscaras
+    $(document).ready(function(){
+      $('#cpf').mask('000.000.000-00', {reverse: true});
+      $('#whatsapp').mask('(00) 00000-0000');
+    });
+
+    // Validação simples de CPF
+    function validarCPF(cpf) {
+      cpf = cpf.replace(/[^\d]+/g,'');
+      if(cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+      let soma = 0, resto;
+      for (let i=1; i<=9; i++) soma += parseInt(cpf.substring(i-1,i))*(11-i);
+      resto = (soma*10)%11;
+      if(resto === 10 || resto === 11) resto = 0;
+      if(resto !== parseInt(cpf.substring(9,10))) return false;
+      soma = 0;
+      for (let i=1; i<=10; i++) soma += parseInt(cpf.substring(i-1,i))*(12-i);
+      resto = (soma*10)%11;
+      if(resto === 10 || resto === 11) resto = 0;
+      if(resto !== parseInt(cpf.substring(10,11))) return false;
+      return true;
+    }
+
+    // Envio do formulário
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const cpf = document.getElementById("cpf").value.trim();
@@ -113,11 +143,36 @@
         alert("Por favor, preencha todos os campos obrigatórios.");
         return;
       }
+      if (!validarCPF(cpf)) {
+        alert("CPF inválido!");
+        return;
+      }
+      if (whatsapp.length < 14) {
+        alert("Número de WhatsApp inválido!");
+        return;
+      }
 
-      alert("Formulário enviado com sucesso!");
       modal.style.display = "none";
       form.reset();
+      modalPix.style.display = "flex";
+
+      // Abre conversa no WhatsApp
+      const numero = whatsapp.replace(/\D/g, '');
+      window.open(`https://wa.me/55${numero}?text=Olá,%20quero%20confirmar%20meu%20ingresso%20para%20o%20campeonato!`, "_blank");
     });
+
+    // Rodapé retrátil no mobile
+    let lastScrollTop = 0;
+    const countdown = document.getElementById("countdown");
+    window.addEventListener("scroll", function(){
+      let st = window.pageYOffset || document.documentElement.scrollTop;
+      if (st > lastScrollTop){
+        countdown.style.transform = "translateY(100%)";
+      } else {
+        countdown.style.transform = "translateY(0)";
+      }
+      lastScrollTop = st <= 0 ? 0 : st;
+    }, false);
   </script>
 </body>
 </html>
