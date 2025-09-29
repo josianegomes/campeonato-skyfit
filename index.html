@@ -15,7 +15,7 @@
       <p class="subtitle">Um show de força e determinação</p>
       <p class="text">Faça parte desse evento e marco que será para Sorocaba dentro do esporte! Onde irá reunir atletas,
         apaixonados por musculação e claro, por fisiculturismo!</p>
-      <p class="text">280 ingressos liberados! <strong>Valor inicial: R$50,00</strong> acesso garantido ao evento.</p>
+      <p class="text" id="vagasTexto">Carregando vagas disponíveis...</p>
       <p class="text">Local: Cineplay Panorâmico (Sala 6), AV Comendador Pereira Inácio - 2480, Sorocaba/SP</p>
     </div>
   </header>
@@ -43,8 +43,8 @@
         <label for="nome">Nome Completo:</label>
         <input type="text" id="nome" name="nome" required placeholder="Seu nome completo">
 
-        <label for="whatsapp">WhatsApp:</label>
-        <input type="tel" id="whatsapp" name="whatsapp" required placeholder="(11) 99999-9999">
+        <label for="celular">WhatsApp:</label>
+        <input type="tel" id="celular" name="celular" required placeholder="(11) 99999-9999">
 
         <button type="submit" class="btn highlight">Enviar</button>
       </form>
@@ -58,15 +58,12 @@
       <h2>Pagamento via PIX</h2>
       <p>Escaneie o QR Code abaixo ou utilize o botão para copiar a chave PIX:</p>
 
-      <!-- QR Code do PIX -->
       <img src="img/Qrcode.jpeg" alt="QR Code PIX" style="width:200px; margin:20px auto; display:block;">
 
-      <!-- Botão para copiar PIX -->
-      <button id="copyPix" class="btn btn-red" style="width:100%; margin-bottom:10px;">
+      <button id="copyPix" class="btn highlight" style="width:100%; margin-bottom:10px;">
         Copiar código PIX
       </button>
 
-      <!-- Botão WhatsApp -->
       <p style="font-size:0.9rem; color:#444; margin-top:50px; margin-bottom: 30px; text-align:center;">
         IMPORTANTE: Após realizar o pagamento, envie seu comprovante para o WhatsApp abaixo para garantir o seu lugar:
       </p>
@@ -77,41 +74,78 @@
   </div>
 
   <!-- Toast -->
-  <div id="toast" class="toast">Chave PIX copiada!</div>
+  <div id="toast" class="toast"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
   <script>
-    // Copiar chave PIX
+    // Base da API
+    const API_BASE = "https://skyfit-api.onrender.com";
+
+    let cpfsCadastrados = [];
     const chavePix = "00020126360014br.gov.bcb.pix0114+5511974991702520400005303986540550.005802BR5919L.F.A ACADEMIA LTDA6014RIO DE JANEIRO62070503***6304C1D8";
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 4000);
+    }
+
+    async function carregarStatus() {
+      try {
+        const response = await fetch(`${API_BASE}/status`);
+        const data = await response.json();
+
+        const vagasTexto = document.getElementById("vagasTexto");
+        const btn = document.getElementById("btnIngressos");
+        const countdownMsg = document.querySelector(".countdown p");
+
+        if (data.esgotado || data.vagasRestantes <= 0) {
+          vagasTexto.innerText = "Vagas esgotadas!";
+          vagasTexto.style.color = "#D80B3D"; // vermelho
+          btn.style.display = "none"; // esconde botão
+
+          countdownMsg.innerText = "Vagas esgotadas!";
+          countdownMsg.style.color = "#D80B3D";
+        } else {
+          vagasTexto.innerText =
+            `${data.vagasRestantes} ingressos disponíveis! Valor inicial: R$50,00`;
+          vagasTexto.style.color = "#fff"; // cor normal
+          btn.style.display = "inline-block";
+
+          countdownMsg.innerText = "Garanta seu ingresso! O valor sobe em:";
+          countdownMsg.style.color = "#fff";
+        }
+      } catch {
+        document.getElementById("vagasTexto").innerText =
+          "Não foi possível carregar as vagas.";
+      }
+    }
+
+    carregarStatus();
+
     document.getElementById("copyPix").addEventListener("click", () => {
       navigator.clipboard.writeText(chavePix).then(() => {
-        const toast = document.getElementById("toast");
-        toast.classList.add("show");
-        toast.innerText = "Chave PIX copiada com sucesso!";
-        setTimeout(() => toast.classList.remove("show"), 3000);
+        showToast("Atenção: a sua vaga só será garantida após o envio do comprovante no WhatsApp!");
       }).catch(() => {
-        const toast = document.getElementById("toast");
-        toast.classList.add("show");
-        toast.innerText = "Erro ao copiar, copie manualmente.";
-        setTimeout(() => toast.classList.remove("show"), 3000);
+        showToast("Não foi possível copiar a chave PIX. Copie manualmente.");
       });
     });
 
-    // Botão WhatsApp (envio de comprovante)
     document.getElementById("whatsPix").addEventListener("click", () => {
-      const numeroEmpresa = "5511974991702"; // número com DDI
+      const numeroEmpresa = "5515992860607";
       const mensagem = "Olá, acabei de realizar o pagamento via PIX. Segue meu comprovante.";
       window.open(`https://wa.me/${numeroEmpresa}?text=${encodeURIComponent(mensagem)}`, "_blank");
     });
 
-    // Contagem regressiva
     const endDate = new Date("2025-10-04T15:20:00").getTime();
     function updateCountdown() {
       const now = new Date().getTime();
       const distance = endDate - now;
-
       if (distance <= 0) {
         document.getElementById("timer").innerHTML = "Promoção encerrada!";
         return;
@@ -120,7 +154,6 @@
       const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
       document.getElementById("days").innerText = days.toString().padStart(2, "0");
       document.getElementById("hours").innerText = hours.toString().padStart(2, "0");
       document.getElementById("minutes").innerText = minutes.toString().padStart(2, "0");
@@ -129,7 +162,6 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // Modal
     const modal = document.getElementById("modal");
     const modalPix = document.getElementById("modalPix");
     const btn = document.getElementById("btnIngressos");
@@ -143,19 +175,16 @@
     });
     closeBtn.addEventListener("click", () => modal.style.display = "none");
     closePix.addEventListener("click", () => modalPix.style.display = "none");
-
     window.addEventListener("click", (e) => {
       if (e.target === modal) modal.style.display = "none";
       if (e.target === modalPix) modalPix.style.display = "none";
     });
 
-    // Máscaras
     $(document).ready(function () {
       $('#cpf').mask('000.000.000-00', { reverse: true });
-      $('#whatsapp').mask('(00) 00000-0000');
+      $('#celular').mask('(00) 00000-0000');
     });
 
-    // Validação simples de CPF
     function validarCPF(cpf) {
       cpf = cpf.replace(/[^\d]+/g, '');
       if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
@@ -172,32 +201,62 @@
       return true;
     }
 
-    // Envio do formulário
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const submitBtn = form.querySelector("button[type='submit']");
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Enviando...";
+
       const cpf = document.getElementById("cpf").value.trim();
       const nome = document.getElementById("nome").value.trim();
-      const whatsapp = document.getElementById("whatsapp").value.trim();
+      const celular = document.getElementById("celular").value.trim();
 
-      if (!cpf || !nome || !whatsapp) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
-        return;
+      if (!cpf || !nome || !celular) {
+        showToast("Por favor, preencha todos os campos obrigatórios.");
+        submitBtn.disabled = false; submitBtn.innerText = "Enviar"; return;
       }
       if (!validarCPF(cpf)) {
-        alert("CPF inválido!");
-        return;
+        showToast("CPF inválido!");
+        submitBtn.disabled = false; submitBtn.innerText = "Enviar"; return;
       }
-      if (whatsapp.length < 14) {
-        alert("Número de WhatsApp inválido!");
-        return;
+      if (celular.length < 14) {
+        showToast("Número de celular inválido!");
+        submitBtn.disabled = false; submitBtn.innerText = "Enviar"; return;
+      }
+      if (cpfsCadastrados.includes(cpf)) {
+        showToast("Este CPF já foi cadastrado. Utilize outro CPF.");
+        submitBtn.disabled = false; submitBtn.innerText = "Enviar"; return;
       }
 
-      modal.style.display = "none";
-      form.reset();
-      modalPix.style.display = "flex";
+      try {
+        const response = await fetch(`${API_BASE}/inscrever`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cpf, nome, celular })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          showToast(result.erro || "Erro ao inscrever. Tente novamente.");
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Enviar";
+          return;
+        }
+
+        showToast(result.message || "Inscrição realizada com sucesso!");
+        cpfsCadastrados.push(cpf);
+        modal.style.display = "none";
+        form.reset();
+        modalPix.style.display = "flex";
+      } catch {
+        showToast("Erro ao enviar inscrição. Tente novamente.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Enviar";
+      }
     });
 
-    // Rodapé retrátil no mobile
     let lastScrollTop = 0;
     const countdown = document.getElementById("countdown");
     window.addEventListener("scroll", function () {
@@ -211,4 +270,5 @@
     }, false);
   </script>
 </body>
+
 </html>
