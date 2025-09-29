@@ -11,6 +11,57 @@ body {
   font-family: 'Oswald', sans-serif;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Exo+2:wght@400;600;700&display=swap');
+
+body {
+  font-family: 'Exo 2', sans-serif;
+}
+
+/* Toast */
+.toast {
+  visibility: hidden;
+  min-width: 200px;
+  background-color: #222;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: 12px;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  font-size: 0.95rem;
+  opacity: 0;
+  transition: opacity 0.5s, visibility 0.5s;
+}
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Botão de fechar */
+.close, .closePix {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  background: #ffffff;
+  color: #ff0000;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.close:hover, .closePix:hover {
+  background: #0056b3;
+}
+
 /* Hero */
 .hero {
   position: relative;
