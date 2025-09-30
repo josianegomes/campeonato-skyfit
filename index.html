@@ -233,15 +233,31 @@
         const result = await response.json();
 
         if (!response.ok) {
+          // Cenário 1: erro com CPF já pago ou inscrições esgotadas
           showToast(result.erro || "Erro ao inscrever. Tente novamente.");
           submitBtn.disabled = false;
           submitBtn.innerText = "Enviar";
           return;
         }
 
-        modal.style.display = "none";
-        form.reset();
-        modalPix.style.display = "flex";
+        // Se sucesso
+        if (result.codigo === "CPF_EXISTE") {
+          // Cenário 2: já inscrito, falta pagar
+          modal.style.display = "none";
+          form.reset();
+          modalPix.style.display = "flex";
+          return;
+        }
+
+        if (result.codigo === "CPF_NOVO") {
+          modal.style.display = "none";
+          form.reset();
+          modalPix.style.display = "flex";
+          return;
+        }
+
+        // Fallback caso venha algo inesperado
+        showToast(result.message || "Operação concluída.");
       } catch {
         showToast("Erro ao enviar inscrição. Tente novamente.");
       } finally {
