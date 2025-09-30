@@ -240,7 +240,7 @@ body {
   }
   .content {
     max-width: 100%;
-    margin-bottom: 260px; /* sobe descrição para não ficar sobre o rodapé */
+    margin-bottom: 220px; /* sobe descrição para não ficar sobre o rodapé */
     padding: 15px;
   }
   .quote { font-size: 1.4rem; }
