@@ -83,7 +83,6 @@
     // Base da API
     const API_BASE = "https://skyfit-api.onrender.com";
 
-    let cpfsCadastrados = [];
     const chavePix = "00020126360014br.gov.bcb.pix0114+5511974991702520400005303986540550.005802BR5919L.F.A ACADEMIA LTDA6014RIO DE JANEIRO62070503***6304C1D8";
 
     function showToast(message) {
@@ -223,10 +222,6 @@
         showToast("Número de celular inválido!");
         submitBtn.disabled = false; submitBtn.innerText = "Enviar"; return;
       }
-      if (cpfsCadastrados.includes(cpf)) {
-        showToast("Este CPF já foi cadastrado. Utilize outro CPF.");
-        submitBtn.disabled = false; submitBtn.innerText = "Enviar"; return;
-      }
 
       try {
         const response = await fetch(`${API_BASE}/inscrever`, {
@@ -244,8 +239,6 @@
           return;
         }
 
-        showToast(result.message || "Inscrição realizada com sucesso!");
-        cpfsCadastrados.push(cpf);
         modal.style.display = "none";
         form.reset();
         modalPix.style.display = "flex";
